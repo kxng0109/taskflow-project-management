@@ -3,6 +3,7 @@ package io.github.kxng0109.taskflow.user;
 import io.github.kxng0109.taskflow.security.dto.RegistrationRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UserService {
@@ -14,6 +15,7 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    @Transactional
     public User registerUser(RegistrationRequest registrationRequest) {
         String userEmail = registrationRequest.email();
         String userPassword = registrationRequest.password();

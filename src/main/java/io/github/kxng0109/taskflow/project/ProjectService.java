@@ -7,6 +7,7 @@ import io.github.kxng0109.taskflow.user.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -20,6 +21,7 @@ public class ProjectService {
         this.userRepository = userRepository;
     }
 
+    @Transactional
     public Project createProject(ProjectRequest projectRequest, User currentUser) {
        Project newProject = Project.builder()
                 .name(projectRequest.name())
@@ -41,6 +43,7 @@ public class ProjectService {
         return projectRepository.findByMembersContaining(currentUser);
     }
 
+    @Transactional
     public Project updateProject(Long projectId, ProjectRequest projectRequest, User currentUser) {
         Project project = getIfUserIsAMemberOfProject(projectId, currentUser);
 
@@ -52,11 +55,13 @@ public class ProjectService {
         return projectRepository.save(project);
     }
 
+    @Transactional
     public void deleteProject(Long projectId, User currentUser) {
         Project project =  getIfUserIsAMemberOfProject(projectId, currentUser);
         projectRepository.delete(project);
     }
 
+    @Transactional
     public Project addMemberToProject(Long projectId, AddMemberRequest addMemberRequest,  User currentUser) {
         Project project = getIfUserIsAMemberOfProject(projectId, currentUser);
         User userToAdd = userRepository.findByEmail(addMemberRequest.email())

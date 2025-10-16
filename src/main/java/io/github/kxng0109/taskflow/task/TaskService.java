@@ -8,6 +8,7 @@ import io.github.kxng0109.taskflow.user.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -23,6 +24,7 @@ public class TaskService {
         this.userRepository = userRepository;
     }
 
+    @Transactional
     public Task createTaskInProject(Long projectId, TaskRequest taskRequest, User currentUser) {
         Project project = getProjectAndVerifyMembership(projectId, currentUser);
 
@@ -56,6 +58,7 @@ public class TaskService {
         return getTaskAndVerifyMembership(projectId, taskId, currentUser);
     }
 
+    @Transactional
     public Task updateTaskInProject(Long projectId, Long taskId, TaskRequest taskUpdate, User currentUser) {
         Task taskToUpdate = getTaskAndVerifyMembership(projectId, taskId, currentUser);
 
@@ -81,6 +84,7 @@ public class TaskService {
         return taskRepository.save(taskToUpdate);
     }
 
+    @Transactional
     public void deleteTaskInProject(Long projectId, Long taskId, User currentUser) {
         Task task = getTaskAndVerifyMembership(projectId, taskId, currentUser);
         taskRepository.delete(task);
