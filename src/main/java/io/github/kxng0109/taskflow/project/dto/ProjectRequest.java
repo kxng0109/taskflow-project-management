@@ -1,9 +1,9 @@
 package io.github.kxng0109.taskflow.project.dto;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 
 public record ProjectRequest(
-        @NotNull(message = "Name cannot be blank")
+        @NotBlank(message = "Name cannot be blank")
         String name,
         String description
 ) {
