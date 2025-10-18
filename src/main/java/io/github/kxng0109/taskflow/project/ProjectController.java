@@ -51,7 +51,7 @@ public class ProjectController {
     @PutMapping("/{projectId}")
     public ResponseEntity<ProjectResponse> updateProject(
             @PathVariable Long projectId,
-            @RequestBody ProjectRequest updateRequest,
+            @Valid @RequestBody ProjectRequest updateRequest,
             @AuthenticationPrincipal User currentUser
     ){
         Project updatedProject = projectService.updateProject(
@@ -73,7 +73,7 @@ public class ProjectController {
     @PostMapping("/{projectId}/members")
     public ResponseEntity<ProjectResponse> addMemberToProject(
             @PathVariable Long projectId,
-            @RequestBody AddMemberRequest member,
+            @Valid @RequestBody AddMemberRequest member,
             @AuthenticationPrincipal User currentUser
     ){
         Project updatedProject = projectService.addMemberToProject(projectId, member, currentUser);
