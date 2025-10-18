@@ -40,7 +40,7 @@ public class ProjectController {
     }
 
     @GetMapping("/{projectId}")
-    public ResponseEntity<ProjectResponse> getProjectId(
+    public ResponseEntity<ProjectResponse> getProjectById(
             @PathVariable Long projectId,
             @AuthenticationPrincipal User currentUser
     ){
