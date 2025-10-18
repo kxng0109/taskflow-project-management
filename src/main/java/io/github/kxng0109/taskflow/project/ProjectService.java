@@ -68,7 +68,7 @@ public class ProjectService {
                 .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + addMemberRequest.email()));
 
         if(project.getMembers().contains(userToAdd)) {
-            throw new IllegalArgumentException("User is already member of this project");
+            throw new IllegalStateException("User is already member of this project");
         }
 
         //Get the existing set of members and add the new one

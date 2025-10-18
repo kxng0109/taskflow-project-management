@@ -31,10 +31,10 @@ public class TaskService {
         User assignee = null;
         if(taskRequest.assigneeId() != null){
             assignee = userRepository.findById(taskRequest.assigneeId())
-                    .orElseThrow(()->new IllegalArgumentException("User with id " + taskRequest.assigneeId() + " not found"));
+                    .orElseThrow(()->new EntityNotFoundException("User with id " + taskRequest.assigneeId() + " not found"));
 
             if(!project.getMembers().contains(assignee)) {
-                throw new IllegalArgumentException("Cannot assign task to a user who is not a member of this project");
+                throw new IllegalStateException("Cannot assign task to a user who is not a member of this project");
             }
         }
 
