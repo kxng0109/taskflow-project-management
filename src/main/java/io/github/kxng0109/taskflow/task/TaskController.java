@@ -87,6 +87,7 @@ public class TaskController {
                 task.getTitle(),
                 task.getDescription(),
                 task.getStatus().name(),
+                task.getProject().getId(),
                 assigneeSummary
         );
     }

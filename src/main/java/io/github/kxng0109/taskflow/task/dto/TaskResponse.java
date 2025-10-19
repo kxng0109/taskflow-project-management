@@ -7,6 +7,7 @@ public record TaskResponse(
         String title,
         String description,
         String status,
+        Long projectId,
         UserSummaryResponse assignee
 ) {
 }
