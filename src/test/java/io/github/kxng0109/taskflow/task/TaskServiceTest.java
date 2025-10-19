@@ -43,7 +43,8 @@ public class TaskServiceTest {
     private Task existingTask;
     private Task otherTask;
     private final Long fakeTaskId = 12345L;
-    private Set<User> members = new HashSet<>();
+    private final Long fakeUserId = 3L;
+    private final Set<User> members = new HashSet<>();
 
     @BeforeEach
     public void setup() {
@@ -115,7 +116,7 @@ public class TaskServiceTest {
     }
 
     @Test
-    public void createTaskInProject_should_throwIllegalStateException_whenUserIsNotAMember() {
+    public void createTaskInProject_should_throwAccessDeniedException_whenUserIsNotAMember() {
         TaskRequest taskRequest = new TaskRequest("task 1", null,"TO_DO", testUserNotAMember.getId());
 
         when(projectRepository.findById(existingProject.getId()))
@@ -123,8 +124,8 @@ public class TaskServiceTest {
         when(userRepository.findById(testUserNotAMember.getId()))
                 .thenReturn(Optional.of(testUserNotAMember));
 
-        IllegalStateException thrownError = assertThrows(
-                IllegalStateException.class,
+        AccessDeniedException thrownError = assertThrows(
+                AccessDeniedException.class,
                 () -> taskService.createTaskInProject(existingProject.getId(), taskRequest, testUserAMember)
         );
 
@@ -246,4 +247,232 @@ public class TaskServiceTest {
         verify(taskRepository).findById(existingTask.getId());
     }
 
+
+    @Test
+    public void updateTaskInProject_should_removeAssigneeAndReturnTask_whenUserIsAMember() {
+        TaskRequest taskRequest = new TaskRequest(
+                "task title",
+                "task description",
+                TaskStatus.DONE.name(),
+                null);
+
+        when(taskRepository.findById(existingTask.getId()))
+                .thenReturn(Optional.of(existingTask));
+        when(taskRepository.save(any(Task.class)))
+                .thenAnswer(i -> i.getArgument(0));
+
+        Task result = taskService.updateTaskInProject(
+                existingProject.getId(),
+                existingTask.getId(),
+                taskRequest,
+                testUserAMember
+        );
+
+        assertNotNull(result);
+        assertEquals(result.getTitle(), taskRequest.title());
+        assertEquals(result.getDescription(), taskRequest.description());
+        assertEquals(taskRequest.status(), result.getStatus().name());
+        assertEquals(existingTask, result);
+        assertNull(result.getAssignee());
+        assertEquals(existingProject, result.getProject());
+
+        verify(taskRepository).findById(existingTask.getId());
+        verify(taskRepository).save(any(Task.class));
+    }
+
+    @Test
+    public void updateTaskInProject_should_throwEntityNotFoundException_whenTaskDoesNotExist() {
+        TaskRequest taskRequest = new TaskRequest(
+                "task title",
+                "task description",
+                TaskStatus.DONE.name(),
+                null
+        );
+
+        when(taskRepository.findById(fakeTaskId))
+                .thenReturn(Optional.empty());
+
+        EntityNotFoundException thrownException = assertThrows(
+                EntityNotFoundException.class,
+                () -> taskService.updateTaskInProject(
+                        existingProject.getId(),
+                        fakeTaskId,
+                        taskRequest,
+                        testUserAMember
+                )
+        );
+
+        assertEquals("Task with id " + fakeTaskId + " not found", thrownException.getMessage());
+        verify(taskRepository).findById(fakeTaskId);
+    }
+
+    @Test
+    public void updateTaskInProject_should_throwAccessDeniedException_whenTaskDoesNotBelongToProject() {
+        TaskRequest taskRequest = new TaskRequest(
+                "task title",
+                "task description",
+                TaskStatus.DONE.name(),
+                null
+        );
+
+        when(taskRepository.findById(otherTask.getId()))
+                .thenReturn(Optional.of(otherTask));
+
+        AccessDeniedException thrownException = assertThrows(
+                AccessDeniedException.class,
+                () -> taskService.updateTaskInProject(
+                        existingProject.getId(),
+                        otherTask.getId(),
+                        taskRequest,
+                        testUserAMember
+                )
+        );
+
+        assertEquals("This task does not belong to this project", thrownException.getMessage());
+
+        verify(taskRepository).findById(otherTask.getId());
+    }
+
+    @Test
+    public void updateTaskInProject_should_throwAccessDeniedException_whenUserIsNotAMember() {
+        TaskRequest taskRequest = new TaskRequest(
+                "task title",
+                "task description",
+                TaskStatus.DONE.name(),
+                null
+        );
+
+        when(taskRepository.findById(existingTask.getId()))
+                .thenReturn(Optional.of(existingTask));
+
+        AccessDeniedException thrownException = assertThrows(
+                AccessDeniedException.class,
+                () -> taskService.updateTaskInProject(
+                        existingProject.getId(),
+                        existingTask.getId(),
+                        taskRequest,
+                        testUserNotAMember
+                )
+        );
+
+        assertEquals("You are not a member of this task's project", thrownException.getMessage());
+
+        verify(taskRepository).findById(existingTask.getId());
+    }
+
+    @Test
+    public void updateTaskInProject_should_throwEntityNotFoundException_whenAssigneeDoesNotExist() {
+        TaskRequest taskRequest = new TaskRequest(
+                "task title",
+                "task description",
+                TaskStatus.DONE.name(),
+                fakeUserId
+        );
+
+        when(taskRepository.findById(existingTask.getId()))
+                .thenReturn(Optional.of(existingTask));
+        when(userRepository.findById(fakeUserId))
+                .thenReturn(Optional.empty());
+
+        EntityNotFoundException thrownException = assertThrows(
+                EntityNotFoundException.class,
+                () -> taskService.updateTaskInProject(
+                        existingProject.getId(),
+                        existingTask.getId(),
+                        taskRequest,
+                        testUserAMember
+                )
+        );
+
+        assertEquals("User with id " + fakeUserId + " not found", thrownException.getMessage());
+
+        verify(taskRepository).findById(existingTask.getId());
+        verify(userRepository).findById(fakeUserId);
+    }
+
+    @Test
+    public void updateTaskInProject_should_throwAccessDeniedException_whenAssigneeDoesNotBelongToProject() {
+        TaskRequest taskRequest = new TaskRequest(
+                "new title",
+                "new description",
+                TaskStatus.DONE.name(),
+                testUserNotAMember.getId()
+        );
+
+        when(taskRepository.findById(existingTask.getId()))
+                .thenReturn(Optional.of(existingTask));
+        when(userRepository.findById(testUserNotAMember.getId()))
+                .thenReturn(Optional.of(testUserNotAMember));
+
+        AccessDeniedException thrownException = assertThrows(
+                AccessDeniedException.class,
+                () -> taskService.updateTaskInProject(
+                        existingProject.getId(),
+                        existingTask.getId(),
+                        taskRequest,
+                        testUserAMember
+                )
+        );
+
+        assertEquals("Cannot assign task to a user who is not a member of this project", thrownException.getMessage());
+
+        verify(taskRepository).findById(existingTask.getId());
+        verify(userRepository).findById(testUserNotAMember.getId());
+    }
+
+
+    @Test
+    public void deleteTaskInProject_should_deleteTask_whenUserIsAMember() {
+        when(taskRepository.findById(existingTask.getId()))
+                .thenReturn(Optional.of(existingTask));
+
+        taskService.deleteTaskInProject(existingProject.getId(), existingTask.getId(), testUserAMember);
+
+        verify(taskRepository).findById(existingTask.getId());
+        verify(taskRepository).delete(existingTask);
+    }
+
+    @Test
+     public void deleteTaskInProject_should_throwEntityNotFoundException_whenTaskDoesNotExist() {
+        when(taskRepository.findById(fakeTaskId))
+                .thenReturn(Optional.empty());
+
+        EntityNotFoundException thrownException = assertThrows(
+                EntityNotFoundException.class,
+                () -> taskService.deleteTaskInProject(existingProject.getId(), fakeTaskId, testUserAMember)
+        );
+
+        assertEquals("Task with id " + fakeTaskId + " not found", thrownException.getMessage());
+        verify(taskRepository).findById(fakeTaskId);
+    }
+
+    @Test
+    public void deleteTaskInProject_should_throwAccessDeniedException_whenTaskDoesNotBelongToProject() {
+        when(taskRepository.findById(otherTask.getId()))
+                .thenReturn(Optional.of(otherTask));
+
+        AccessDeniedException thrownException = assertThrows(
+                AccessDeniedException.class,
+                () -> taskService.deleteTaskInProject(existingProject.getId(), otherTask.getId(), testUserAMember)
+        );
+
+        assertEquals("This task does not belong to this project", thrownException.getMessage());
+
+        verify(taskRepository).findById(otherTask.getId());
+    }
+
+    @Test
+    public void deleteTaskInProject_should_throwAccessDeniedException_whenUserIsNotAMember() {
+        when(taskRepository.findById(existingTask.getId()))
+                .thenReturn(Optional.of(existingTask));
+
+        AccessDeniedException thrownException = assertThrows(
+                AccessDeniedException.class,
+                () -> taskService.deleteTaskInProject(existingProject.getId(), existingTask.getId(), testUserNotAMember)
+        );
+
+        assertEquals("You are not a member of this task's project", thrownException.getMessage());
+
+        verify(taskRepository).findById(existingTask.getId());
+    }
 }
