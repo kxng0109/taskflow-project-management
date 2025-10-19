@@ -34,7 +34,7 @@ public class TaskService {
                     .orElseThrow(()->new EntityNotFoundException("User with id " + taskRequest.assigneeId() + " not found"));
 
             if(!project.getMembers().contains(assignee)) {
-                throw new IllegalStateException("Cannot assign task to a user who is not a member of this project");
+                throw new AccessDeniedException("Cannot assign task to a user who is not a member of this project");
             }
         }
 
