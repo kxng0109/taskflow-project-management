@@ -3,10 +3,7 @@ package io.github.kxng0109.taskflow.user;
 import io.github.kxng0109.taskflow.project.Project;
 import io.github.kxng0109.taskflow.task.Task;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -18,8 +15,9 @@ import java.util.Set;
 @Table(name = "users")
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode(exclude = {"projects", "assignedTasks"})
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

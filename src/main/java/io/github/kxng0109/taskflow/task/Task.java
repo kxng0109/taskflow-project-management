@@ -3,17 +3,16 @@ package io.github.kxng0109.taskflow.task;
 import io.github.kxng0109.taskflow.project.Project;
 import io.github.kxng0109.taskflow.user.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Table(name = "tasks")
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
+@Getter
+@Setter
 @Builder
+@EqualsAndHashCode(exclude = {"project"})
 public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

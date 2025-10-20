@@ -3,10 +3,7 @@ package io.github.kxng0109.taskflow.project;
 import io.github.kxng0109.taskflow.task.Task;
 import io.github.kxng0109.taskflow.user.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 import java.util.Set;
@@ -15,8 +12,10 @@ import java.util.Set;
 @Table(name = "projects")
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
+@Getter
+@Setter
 @Builder
+@EqualsAndHashCode(exclude = {"members", "tasks"})
 public class Project {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,4 +32,24 @@ public class Project {
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Task> tasks;
+
+    public void addTask(Task task) {
+        task.setProject(this);
+        tasks.add(task);
+    }
+
+    public void removeTask(Task task) {
+        task.setProject(null);
+        tasks.remove(task);
+    }
+
+    public void addMember(User user) {
+        this.members.add(user);
+        user.getProjects().add(this);
+    }
+
+    public void removeMember(User user) {
+        this.members.remove(user);
+        user.getProjects().remove(this);
+    }
 }
