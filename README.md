@@ -7,6 +7,8 @@ with a focus on clean architecture, modern security practices, and a comprehensi
 The application allows users to register, manage projects, collaborate with team members, and track tasks through
 various stages of completion, all through a secure, stateless RESTful API.
 
+This project is fully containerized with Docker and Docker Compose, allowing for a simple, one-command setup.
+
 ---
 
 ## Table of contents
@@ -45,6 +47,7 @@ to ensure high cohesion and scalability.
 * Database: PostgreSQL (managed via Docker) & H2 (for tests)
 * Testing: JUnit 5, Mockito, Spring Test & MockMvc
 * Build: Maven
+* Docker & Docker Compose (for containerization)
 * Validation: Jakarta Bean Validation (Hibernate Validator)
 * API Documentation: (See "API Documentation & Usage" section below)
 
@@ -56,6 +59,9 @@ This API is fully documented using the OpenAPI 3.0 standard, with an interactive
 application is running, the documentation is automatically generated and available.
 
 Access the documentation at: http://localhost:8080/swagger-ui.html
+
+You can use the `POST /api/auth/login` endpoint to get a JWT and then click the Authorize button at the top right of the
+page to test all the secure endpoints.
 
 ---
 
@@ -212,6 +218,55 @@ On Windows (PowerShell):
 ```powershell
 $env:JWT_SECRET="bXlzZWNyZXRrZXlmb3J0YXNrZmxvd2FwcGxpY2F0aW9uYW5kaXQtaGFzLXRvLWJlLXN1cGVyLWxvbmc="; ./mvnw.cmd test
 ```
+
+---
+
+## Getting Started: Using Docker
+
+This application is fully containerized. The only prerequisite is to have Docker and Docker Compose installed on your
+machine.
+
+### Prerequisites
+
+* Docker Desktop
+
+### 1. Clone the Repository
+
+```bash
+git clone [https://github.com/kxng0109/taskflow-project-management](https://github.com/kxng0109/taskflow-project-management)
+cd taskflow
+```
+
+### 2. Create the Environment File
+
+The application requires two secret keys, which are managed using a `.env` file for security.
+
+In the root of the project, create a new file named `.env`.
+
+Copy the contents of the `.env.example` file into your new `.env` file.
+
+(Optional) Change the default values for `POSTGRES_PASSWORD` and `JWT_SECRET` to your own secure secrets.
+
+**Important:** The `.env` file is listed in `.gitignore` and should never be committed to version control.
+
+### 3. Run the Application
+
+With Docker running, execute the following single command from the project root:
+
+```bash
+docker-compose up --build
+```
+
+This command will:
+
+* Create a dedicated Docker network.
+* Start the PostgreSQL database container.
+* Build a production-ready Docker image for the Spring Boot application using a multi-stage Dockerfile.
+* Start the application container, connecting it to the database.
+
+The API will be available at `http://localhost:8080`.
+
+To stop the entire application stack, simply press Ctrl + C in the same terminal.
 
 ---
 
