@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -17,6 +18,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Getter
 @Setter
+@Builder
 @EqualsAndHashCode(exclude = {"projects", "assignedTasks"})
 public class User implements UserDetails {
     @Id
@@ -33,10 +35,12 @@ public class User implements UserDetails {
     private String password;
 
     @ManyToMany(mappedBy = "members")
-    private Set<Project> projects;
+    @Builder.Default
+    private Set<Project> projects = new HashSet<>();
 
     @OneToMany(mappedBy = "assignee")
-    private Set<Task> assignedTasks;
+    @Builder.Default
+    private Set<Task> assignedTasks = new HashSet<>();
 
 
     @Override

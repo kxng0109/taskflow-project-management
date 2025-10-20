@@ -5,6 +5,8 @@ import io.github.kxng0109.taskflow.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -28,10 +30,12 @@ public class Project {
     private String description;
 
     @ManyToMany
-    private Set<User> members;
+    @Builder.Default
+    private Set<User> members = new HashSet<>();
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Task> tasks;
+    @Builder.Default
+    private List<Task> tasks = new ArrayList<>();
 
     public void addTask(Task task) {
         task.setProject(this);
