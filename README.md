@@ -18,6 +18,7 @@ This project is fully containerized with Docker and Docker Compose, allowing for
 * [Security Flow](#security-flow)
 * [Testing Strategy](#testing-strategy)
 * [Getting Started (Local Setup)](#getting-started-local-setup)
+* [Getting Started (Using Docker)](#getting-started-using-docker)
 * [License](#license)
 
 ---
@@ -33,6 +34,8 @@ This project is fully containerized with Docker and Docker Compose, allowing for
   projects they are members of.
 * Professional API Design: Clean API contract using DTOs for requests and responses, with a central exception handler
   for predictable error messages (`400`, `401`, `403`, `404`).
+* Continuous Integration: A CI pipeline with GitHub Actions automatically runs all tests on every push to ensure the
+  main branch is always stable.
 
 ---
 
@@ -50,6 +53,7 @@ to ensure high cohesion and scalability.
 * Docker & Docker Compose (for containerization)
 * Validation: Jakarta Bean Validation (Hibernate Validator)
 * API Documentation: (See "API Documentation & Usage" section below)
+* GitHub Actions (for CI/CD)
 
 ---
 
