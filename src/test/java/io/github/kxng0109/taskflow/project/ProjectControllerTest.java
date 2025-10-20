@@ -54,10 +54,10 @@ public class ProjectControllerTest {
     public void setup() {
         String testEmail = "testEmail@email.com";
         testUser = User.builder()
-                .name("testName")
-                .password(passwordEncoder.encode("testPassword"))
-                .email(testEmail)
-                .build();
+                       .name("testName")
+                       .password(passwordEncoder.encode("testPassword"))
+                       .email(testEmail)
+                       .build();
 
         userRepository.save(testUser);
     }
@@ -66,10 +66,10 @@ public class ProjectControllerTest {
         LoginRequest loginRequest = new LoginRequest(testUser.getEmail(), "testPassword");
 
         String result = mockMvc.perform(post("/api/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(loginRequest)))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+                                                .contentType(MediaType.APPLICATION_JSON)
+                                                .content(objectMapper.writeValueAsString(loginRequest)))
+                               .andExpect(status().isOk())
+                               .andReturn().getResponse().getContentAsString();
 
         return JsonPath.parse(result).read("$.accessToken");
     }
@@ -80,13 +80,13 @@ public class ProjectControllerTest {
         ProjectRequest newProject = new ProjectRequest("newProject", "newDescription");
 
         mockMvc.perform(post(basePath)
-                        .header("Authorization", "Bearer " + loginAndGetToken())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(newProject)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.name").value(newProject.name()))
-                .andExpect(jsonPath("$.description").value(newProject.description()))
-                .andExpect(jsonPath("$.members[*].name", hasItem(testUser.getName())));
+                                .header("Authorization", "Bearer " + loginAndGetToken())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(newProject)))
+               .andExpect(status().isCreated())
+               .andExpect(jsonPath("$.name").value(newProject.name()))
+               .andExpect(jsonPath("$.description").value(newProject.description()))
+               .andExpect(jsonPath("$.members[*].name", hasItem(testUser.getName())));
     }
 
     @Test
@@ -94,20 +94,20 @@ public class ProjectControllerTest {
         ProjectRequest newProject = new ProjectRequest("", "newDescription");
 
         mockMvc.perform(post(basePath)
-                        .header("Authorization", "Bearer " + loginAndGetToken())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(newProject)))
-                .andExpect(status().isBadRequest());
+                                .header("Authorization", "Bearer " + loginAndGetToken())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(newProject)))
+               .andExpect(status().isBadRequest());
     }
 
     @Test
-    void createProject_should_throw403Forbidden_whenUserIsNotAuthenticated() throws Exception {
+    void createProject_should_throw401Unauthorized_whenUserIsNotAuthenticated() throws Exception {
         ProjectRequest newProject = new ProjectRequest("newProject", "newDescription");
 
         mockMvc.perform(post(basePath)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(newProject)))
-                .andExpect(status().isForbidden());
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(newProject)))
+               .andExpect(status().isUnauthorized());
     }
 
 
@@ -116,15 +116,15 @@ public class ProjectControllerTest {
         Project project = setupProjectAndAddTestUser();
 
         mockMvc.perform(get(basePath).header("Authorization", "Bearer " + loginAndGetToken()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].name").value(project.getName()))
-                .andExpect(jsonPath("$[0].description").value(project.getDescription()))
-                .andExpect(jsonPath("$[0].members[*].name", hasItem(testUser.getName())));
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$[0].name").value(project.getName()))
+               .andExpect(jsonPath("$[0].description").value(project.getDescription()))
+               .andExpect(jsonPath("$[0].members[*].name", hasItem(testUser.getName())));
     }
 
     @Test
-    void getProjectsForUser_should_throw403Forbidden_whenUserIsNotAuthenticated() throws Exception {
-        mockMvc.perform(get(basePath)).andExpect(status().isForbidden());
+    void getProjectsForUser_should_throw401Unauthorized_whenUserIsNotAuthenticated() throws Exception {
+        mockMvc.perform(get(basePath)).andExpect(status().isUnauthorized());
     }
 
 
@@ -133,26 +133,26 @@ public class ProjectControllerTest {
         Project project = setupProjectAndAddTestUser();
 
         mockMvc.perform(get(basePath + "/{projectId}", project.getId())
-                        .header("Authorization", "Bearer " + loginAndGetToken()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value(project.getName()))
-                .andExpect(jsonPath("$.description").value(project.getDescription()))
-                .andExpect(jsonPath("$.members[*].name", hasItem(testUser.getName())));
+                                .header("Authorization", "Bearer " + loginAndGetToken()))
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$.name").value(project.getName()))
+               .andExpect(jsonPath("$.description").value(project.getDescription()))
+               .andExpect(jsonPath("$.members[*].name", hasItem(testUser.getName())));
     }
 
     @Test
-    void getProjectById_should_throw403Forbidden_whenUserIsNotAuthenticated() throws Exception {
+    void getProjectById_should_throw401Unauthorized_whenUserIsNotAuthenticated() throws Exception {
         Project project = setupProject();
 
         mockMvc.perform(get(basePath + "/{projectId}", project.getId()))
-                .andExpect(status().isForbidden());
+               .andExpect(status().isUnauthorized());
     }
 
     @Test
     void getProjectById_should_throw404EntityNotFoundException_whenProjectIsNotFound() throws Exception {
         mockMvc.perform(get(basePath + "/{projectId}", 12453)
-                .header("Authorization", "Bearer " + loginAndGetToken()))
-                .andExpect(status().isNotFound());
+                                .header("Authorization", "Bearer " + loginAndGetToken()))
+               .andExpect(status().isNotFound());
     }
 
 
@@ -163,13 +163,13 @@ public class ProjectControllerTest {
         ProjectRequest updatedProject = new ProjectRequest("newProjectNewName", "newDescription");
 
         mockMvc.perform(put(basePath + "/{projectId}", project.getId())
-                        .header("Authorization", "Bearer " + loginAndGetToken())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updatedProject)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value(updatedProject.name()))
-                .andExpect(jsonPath("$.description").value(updatedProject.description()))
-                .andExpect(jsonPath("$.members[*].name", hasItem(testUser.getName())));
+                                .header("Authorization", "Bearer " + loginAndGetToken())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(updatedProject)))
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$.name").value(updatedProject.name()))
+               .andExpect(jsonPath("$.description").value(updatedProject.description()))
+               .andExpect(jsonPath("$.members[*].name", hasItem(testUser.getName())));
     }
 
     @Test
@@ -179,22 +179,22 @@ public class ProjectControllerTest {
         ProjectRequest updatedProject = new ProjectRequest("", "newDescription");
 
         mockMvc.perform(put(basePath + "/{projectId}", project.getId())
-                        .header("Authorization", "Bearer " + loginAndGetToken())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updatedProject)))
-                .andExpect(status().isBadRequest());
+                                .header("Authorization", "Bearer " + loginAndGetToken())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(updatedProject)))
+               .andExpect(status().isBadRequest());
     }
 
     @Test
-    void updateProject_should_throw403Forbidden_whenUserIsNotAuthenticated() throws Exception {
+    void updateProject_should_throw401Unauthorized_whenUserIsNotAuthenticated() throws Exception {
         Project project = setupProject();
 
         ProjectRequest updatedProject = new ProjectRequest("newProjectNewName", "newDescription");
 
         mockMvc.perform(put(basePath + "/{projectId}", project.getId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(updatedProject)))
-                .andExpect(status().isForbidden());
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(updatedProject)))
+               .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -203,10 +203,10 @@ public class ProjectControllerTest {
         ProjectRequest updatedProject = new ProjectRequest("newProjectNewName", "newDescription");
 
         mockMvc.perform(put(basePath + "/{projectId}", project.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + loginAndGetToken())
-                        .content(objectMapper.writeValueAsString(updatedProject)))
-                .andExpect(status().isForbidden());
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .header("Authorization", "Bearer " + loginAndGetToken())
+                                .content(objectMapper.writeValueAsString(updatedProject)))
+               .andExpect(status().isForbidden());
     }
 
     @Test
@@ -214,10 +214,10 @@ public class ProjectControllerTest {
         ProjectRequest updatedProject = new ProjectRequest("newProjectNewName", "newDescription");
 
         mockMvc.perform(put(basePath + "/{projectId}", 12453)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .header("Authorization", "Bearer " + loginAndGetToken())
-                            .content(objectMapper.writeValueAsString(updatedProject)))
-                .andExpect(status().isNotFound());
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .header("Authorization", "Bearer " + loginAndGetToken())
+                                .content(objectMapper.writeValueAsString(updatedProject)))
+               .andExpect(status().isNotFound());
     }
 
 
@@ -226,16 +226,16 @@ public class ProjectControllerTest {
         Project project = setupProjectAndAddTestUser();
 
         mockMvc.perform(delete(basePath + "/{projectId}", project.getId())
-                        .header("Authorization", "Bearer " + loginAndGetToken()))
-                .andExpect(status().isNoContent());
+                                .header("Authorization", "Bearer " + loginAndGetToken()))
+               .andExpect(status().isNoContent());
     }
 
     @Test
-    void deleteProject_should_throw403Forbidden_whenUserIsNotAuthenticated() throws Exception {
+    void deleteProject_should_throw401Unauthorized_whenUserIsNotAuthenticated() throws Exception {
         Project project = setupProject();
 
         mockMvc.perform(delete(basePath + "/{projectId}", project.getId()))
-                .andExpect(status().isForbidden());
+               .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -243,15 +243,15 @@ public class ProjectControllerTest {
         Project project = setupProject();
 
         mockMvc.perform(delete(basePath + "/{projectId}", project.getId())
-                        .header("Authorization", "Bearer " + loginAndGetToken()))
-                .andExpect(status().isForbidden());
+                                .header("Authorization", "Bearer " + loginAndGetToken()))
+               .andExpect(status().isForbidden());
     }
 
     @Test
     void deleteProject_should_throw404EntityNotFoundException_whenProjectIsNotFound() throws Exception {
         mockMvc.perform(delete(basePath + "/{projectId}", 12453)
-                        .header("Authorization", "Bearer " + loginAndGetToken()))
-                .andExpect(status().isNotFound());
+                                .header("Authorization", "Bearer " + loginAndGetToken()))
+               .andExpect(status().isNotFound());
     }
 
 
@@ -260,22 +260,22 @@ public class ProjectControllerTest {
         Project project = setupProjectAndAddTestUser();
 
         User newUserToAdd = User.builder()
-                .name("otherUser")
-                .password(passwordEncoder.encode("otherPassword"))
-                .email("otherEmail@email.com")
-                .build();
+                                .name("otherUser")
+                                .password(passwordEncoder.encode("otherPassword"))
+                                .email("otherEmail@email.com")
+                                .build();
         userRepository.save(newUserToAdd);
 
         AddMemberRequest addMemberRequest = new AddMemberRequest(newUserToAdd.getEmail());
 
         mockMvc.perform(post(basePath + "/{projectId}/members", project.getId())
-                        .header("Authorization", "Bearer " + loginAndGetToken())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(addMemberRequest)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.members[*].name", hasItem(newUserToAdd.getName())))
-                .andExpect(jsonPath("$.members", hasSize(2)))
-                .andExpect(jsonPath("$.description").value(project.getDescription()));
+                                .header("Authorization", "Bearer " + loginAndGetToken())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(addMemberRequest)))
+               .andExpect(status().isCreated())
+               .andExpect(jsonPath("$.members[*].name", hasItem(newUserToAdd.getName())))
+               .andExpect(jsonPath("$.members", hasSize(2)))
+               .andExpect(jsonPath("$.description").value(project.getDescription()));
     }
 
     @Test
@@ -285,29 +285,29 @@ public class ProjectControllerTest {
         AddMemberRequest addMemberRequest = new AddMemberRequest("");
 
         mockMvc.perform(post(basePath + "/{projectId}/members", project.getId())
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(addMemberRequest))
-                            .header("Authorization", "Bearer " + loginAndGetToken()))
-                .andExpect(status().isBadRequest());
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(addMemberRequest))
+                                .header("Authorization", "Bearer " + loginAndGetToken()))
+               .andExpect(status().isBadRequest());
     }
 
     @Test
-    void addMemberToProject_should_throw403Forbidden_whenUserIsNotAuthenticated() throws Exception {
+    void addMemberToProject_should_throw401Unauthorized_whenUserIsNotAuthenticated() throws Exception {
         Project project = setupProjectAndAddTestUser();
 
         User newUserToAdd = User.builder()
-                .name("otherUser")
-                .password(passwordEncoder.encode("otherPassword"))
-                .email("otherEmail@email.com")
-                .build();
+                                .name("otherUser")
+                                .password(passwordEncoder.encode("otherPassword"))
+                                .email("otherEmail@email.com")
+                                .build();
         userRepository.save(newUserToAdd);
 
         AddMemberRequest addMemberRequest = new AddMemberRequest(newUserToAdd.getEmail());
 
         mockMvc.perform(post(basePath + "/{projectId}/members", project.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(addMemberRequest)))
-                .andExpect(status().isForbidden());
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(addMemberRequest)))
+               .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -315,37 +315,37 @@ public class ProjectControllerTest {
         Project project = setupProject();
 
         User newUserToAdd = User.builder()
-                .name("otherUser")
-                .password(passwordEncoder.encode("otherPassword"))
-                .email("otherEmail@email.com")
-                .build();
+                                .name("otherUser")
+                                .password(passwordEncoder.encode("otherPassword"))
+                                .email("otherEmail@email.com")
+                                .build();
         userRepository.save(newUserToAdd);
 
         AddMemberRequest addMemberRequest = new AddMemberRequest(newUserToAdd.getEmail());
 
         mockMvc.perform(post(basePath + "/{projectId}/members", project.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(addMemberRequest))
-                        .header("Authorization", "Bearer " + loginAndGetToken()))
-                .andExpect(status().isForbidden());
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(addMemberRequest))
+                                .header("Authorization", "Bearer " + loginAndGetToken()))
+               .andExpect(status().isForbidden());
     }
 
     @Test
     void addMemberToProject_should_throw404EntityNotFoundException_whenProjectIsNotFound() throws Exception {
         User newUserToAdd = User.builder()
-                .name("otherUser")
-                .password(passwordEncoder.encode("otherPassword"))
-                .email("otherEmail@email.com")
-                .build();
+                                .name("otherUser")
+                                .password(passwordEncoder.encode("otherPassword"))
+                                .email("otherEmail@email.com")
+                                .build();
         userRepository.save(newUserToAdd);
 
         AddMemberRequest addMemberRequest = new AddMemberRequest(newUserToAdd.getEmail());
 
         mockMvc.perform(post(basePath + "/{projectId}/members", 123456789)
-                        .header("Authorization", "Bearer " + loginAndGetToken())
-                        .content(objectMapper.writeValueAsString(addMemberRequest))
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound());
+                                .header("Authorization", "Bearer " + loginAndGetToken())
+                                .content(objectMapper.writeValueAsString(addMemberRequest))
+                                .contentType(MediaType.APPLICATION_JSON))
+               .andExpect(status().isNotFound());
     }
 
     @Test
@@ -355,10 +355,10 @@ public class ProjectControllerTest {
         AddMemberRequest addMemberRequest = new AddMemberRequest("randomuser@email.com");
 
         mockMvc.perform(post(basePath + "/{projectId}/members", project.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(addMemberRequest))
-                        .header("Authorization", "Bearer " + loginAndGetToken()))
-                .andExpect(status().isNotFound());
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(addMemberRequest))
+                                .header("Authorization", "Bearer " + loginAndGetToken()))
+               .andExpect(status().isNotFound());
     }
 
     @Test
@@ -367,10 +367,10 @@ public class ProjectControllerTest {
         members.add(testUser);
 
         User newUserToAdd = User.builder()
-                .name("newUser")
-                .email("newEmail@email.com")
-                .password(passwordEncoder.encode("encodethis"))
-                .build();
+                                .name("newUser")
+                                .email("newEmail@email.com")
+                                .password(passwordEncoder.encode("encodethis"))
+                                .build();
         userRepository.save(newUserToAdd);
         members.add(newUserToAdd);
 
@@ -380,14 +380,14 @@ public class ProjectControllerTest {
         AddMemberRequest addMemberRequest = new AddMemberRequest(newUserToAdd.getEmail());
 
         mockMvc.perform(post(basePath + "/{projectId}/members", project.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + loginAndGetToken())
-                        .content(objectMapper.writeValueAsString(addMemberRequest)))
-                .andExpect(status().isConflict());
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .header("Authorization", "Bearer " + loginAndGetToken())
+                                .content(objectMapper.writeValueAsString(addMemberRequest)))
+               .andExpect(status().isConflict());
     }
 
 
-    private Project setupProject(){
+    private Project setupProject() {
         Project project = Project.builder().name("projectName").members(new HashSet<>()).build();
         return projectRepository.save(project);
     }

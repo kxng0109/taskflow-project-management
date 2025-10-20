@@ -96,7 +96,7 @@ public class TaskControllerTest {
     }
 
     @Test
-    void createTaskInProject_should_throw403Forbidden_whenUserIsNotAuthenticated() throws Exception {
+    void createTaskInProject_should_throw401Unauthorized_whenUserIsNotAuthenticated() throws Exception {
         Project project = setupProjectWithMember();
 
         TaskRequest taskRequest = new TaskRequest(
@@ -109,7 +109,7 @@ public class TaskControllerTest {
         mockMvc.perform(post(basePath + "/tasks", project.getId())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(taskRequest)))
-               .andExpect(status().isForbidden());
+               .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -215,11 +215,11 @@ public class TaskControllerTest {
     }
 
     @Test
-    void getTasksForProject_should_throw403Forbidden_whenUserIsNotAuthenticated() throws Exception {
+    void getTasksForProject_should_throw401Unauthorized_whenUserIsNotAuthenticated() throws Exception {
         Task task = setupTaskInProject();
 
         mockMvc.perform(get(basePath + "/tasks", task.getProject().getId()))
-               .andExpect(status().isForbidden());
+               .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -256,11 +256,11 @@ public class TaskControllerTest {
     }
 
     @Test
-    void getTaskById_should_throw403Forbidden_whenUserIsNotAuthenticated() throws Exception {
+    void getTaskById_should_throw401Unauthorized_whenUserIsNotAuthenticated() throws Exception {
         Task task = setupTaskInProject();
 
         mockMvc.perform(get(basePath + "/tasks/{taskId}", task.getProject().getId(), task.getId()))
-               .andExpect(status().isForbidden());
+               .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -317,7 +317,7 @@ public class TaskControllerTest {
     }
 
     @Test
-    void updateTaskInProject_should_throw403AccessDeniedException_whenUserIsNotAuthenticated() throws Exception {
+    void updateTaskInProject_should_throw401Unauthorized_whenUserIsNotAuthenticated() throws Exception {
         Task task = setupTaskInProject();
         TaskRequest taskRequest = new TaskRequest(
                 "new title",
@@ -329,7 +329,7 @@ public class TaskControllerTest {
         mockMvc.perform(put(basePath + "/tasks/{taskId}", task.getProject().getId(), task.getId())
                                 .content(objectMapper.writeValueAsString(taskRequest))
                                 .contentType(MediaType.APPLICATION_JSON))
-               .andExpect(status().isForbidden());
+               .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -455,11 +455,11 @@ public class TaskControllerTest {
     }
 
     @Test
-    void deleteTaskInProject_should_return403ForbiddenException_whenUserIsNotAuthenticated() throws Exception {
+    void deleteTaskInProject_should_throw401Unauthorized_whenUserIsNotAuthenticated() throws Exception {
         Task task = setupTaskInProject();
 
         mockMvc.perform(delete(basePath + "/tasks/{taskId}", task.getProject().getId(), task.getId()))
-               .andExpect(status().isForbidden());
+               .andExpect(status().isUnauthorized());
     }
 
     @Test
